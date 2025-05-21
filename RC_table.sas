@@ -1,0 +1,295 @@
+/*----------------------------------------------------------------------------
+    Author:               liu sheng
+  Creation Date:         2023-07-05     
+-----------------------------------------------------------------------------*/
+
+/*===========================================================================*
+Program Name        :  * RC_table.sas*
+Path                :  *程序保存的路径*
+Program Language    :  SAS V9.4
+______________________________________________________________________________
+
+Purpose             : * *
+
+Macro Calls         : * *
+
+
+Input               : 无
+Output              : 无
+
+Program Flow        : *编程步骤*
+
+     *1.  创建R*C表频数的程序 *
+
+______________________________________________________________________________
+
+Version History     : *版本信息*
+
+Version     Date           Programmer       Description
+-------     ----------     ----------       -----------
+ 1.0        2023-07-05      刘胜            创建程序
+ 2.0        2024-05-30      刘胜            新增三种计算频率的方法
+ 3.0        2024-06-26      刘胜            补充var1/2txt不指定分类情况下，自动读取分类分析
+ 4.0        2024-08-07      刘胜            修复分类过多，行分类覆盖的问题（循环宏变量相同覆盖问题）
+ 5.0        2024-08-23      刘胜            新增行分类后缀标签
+ 6.0        2025-03-31      刘胜            解决 数据文本分类中 含有“%”解析问题，新增分隔符宏参数
+
+==========================================================================*/
+
+
+
+
+
+/* ---------------------------------------------R*C表计数----------------------------------------------- */
+
+%macro rc_table(indata ,outdata ,var1,var2 ,var1txt =%str(),var2txt = %str(),
+freqyn=0,freqtype=%str(total),perfmt=percent9.1,misstxt=%str(缺失),rowtxt_suffix=%str()
+,delimiter=" " )/parmbuff;
+    
+
+/* 创建窗口：用于输出参数注释 */
+%window RC_table_winname_tem1 
+
+    #5 @8 '========================================================宏RC_table参数注释=============================================================='
+    #7 @16 'RC_table: RC表频数频率计算' color=red
+    #9 @16 '参数：' color=red
+    #11 @18 'indata             : 输入数据集；用于分析的数据集名称（必填）' color=blue
+    #13 @18 'outdata            : 输出数据集；用于呈现分析结果的数据集名称（必填）' color=blue
+    #15 @18 'var1               : 横标目分析变量；文本格式（必填）' color=blue
+    #17 @18 'var1txt            : 横标目分析变量-数据分类文本；用于指定特定的分类分析（分类用空格隔开，按出表顺序排序），如var1txt=%str(正常 异常 未查)'
+    #19 @18 'var2               : 纵标目分析变量；文本格式（必填）' color=blue
+    #21 @18 'var2txt            : 纵标目分析变量-数据分类文本；用于指定特定的分类分析（分类用空格隔开，按出表顺序排序），如var2txt=%str(试验组 对照组 安慰剂组)'
+    #23 @18 'freqyn             : 是否计算频率，默认为：freqyn=0（不计算），当freqyn=1时计算频率，呈现为"n(%)"'
+    #25 @18 'freqtype           : 频率计算类型（支持三种方式：total-总合计，col-列合计，line-行合计），默认为：freqtype=%str(total)，即按照RC表总合计进行计算'
+    #27 @18 'perfmt             : 频率格式，默认为：percent9.1'
+    #29 @18 'misstxt            : var1/var2分类变量 分类缺失值的填补文本，默认为：misstxt=%str(缺失)'
+    #31 @18 'rowtxt_suffix      : 横标目具体分类呈现后缀，默认为：rowtxt_suffix=%str()；如：“分类1，n(%)”'
+    #33 @18 'delimiter          : 分类分隔符（当使用var1txt/var2txt时，可指定特定的分隔符，默认为"空格"（中文逗号建议不作为分隔符,非ASCII字符的处理存在一些特殊问题））'         
+
+
+    #36 @16 '备注：' color=red
+    #38 @18 '1.此宏适用于R×C表计数（频率）'
+    #40 @18 '2.使用var1txt/var2txt指定分类时，通过空格隔开各分类，按照var1txt/var2txt指定的分类顺序呈现结果；'
+    #42 @18 '3.使用var1txt/var2txt指定分类时，仅呈现指定得分类结果（可能会出现总合计与数据集例数不匹配得情况）；'
+    #44 @18 '4.通过命令：%rc_table; 或 %rc_table(); 或%rc_table(help) 调出参数注释窗口。'
+
+    #50 @16 '历史版本：' color=red
+    #52 @18 'V1.0, on 2023-07-05 ; Author: liu sheng ; 版本描述：新版本'
+    #54 @18 'V2.0, on 2024-05-30 ; Author: liu sheng ; 版本描述：新增三种计算频率的方法 "freqtype=%str()"（total-总合计，col-列合计，line-行合计）'
+    #56 @18 'V3.0, on 2024-06-26 ; Author: liu sheng ; 版本描述：补充var1/2txt不指定分类情况下，自动读取分类分析'
+    #58 @18 'V4.0, on 2024-08-07 ; Author: liu sheng ; 版本描述：修复分类过多，行分类覆盖的问题（循环宏变量相同覆盖问题）'
+    #60 @18 'V5.0, on 2024-08-23 ; Author: liu sheng ; 版本描述：新增行分类后缀标签'
+    #62 @18 'V6.0, on 2025-03-31 ; Author: liu sheng ; 版本描述：解决 数据文本分类中 含有“%”解析问题'
+
+    #68 @8 '========================================================================================================================================='
+
+/* 窗口结束 */
+;
+/* 打开参数注释：parmbuff和Syspbuff，‘Q’可以隐藏特殊字符，此处主要用于隐藏引号"" */
+%if %length(&Syspbuff)=0 or %bquote(&Syspbuff) = %bquote(()) or  %qupcase(&Syspbuff) = %bquote((HELP)) %then %do; 
+    %display RC_table_winname_tem1  ;
+%end;
+
+%else %do;
+
+
+/* 统一大写 */
+%let freqtype=%sysfunc( upcase(&freqtype) ) ;
+/*%put freqtype= &freqtype ;*/
+
+
+
+/* ----------------读入数据集-------------- */
+/* 缺失填补为&misstxt，%superq()直接获取宏变量的值而不触发任何宏解析 */
+proc sql noprint;
+    create table indata as
+        select  
+            coalescec(&var1,"%superq(misstxt)" ) as &var1,
+            coalescec(&var2,"%superq(misstxt)" ) as &var2
+        from &indata ;
+quit;
+run;
+
+
+/* ----------获取横标目和纵标目的分类数------------- */
+/* 若var1/2txt文本没有指定,则自动提取 */
+%if %length(&var1txt)=0 %then %do;
+    /* 提取行分类-缺失已填补为&misstxt */
+    proc sql noprint;
+        create table rowcat1 as
+        select
+            distinct( &var1 ) as rowcat
+        from indata; 
+    quit;
+    data _null_;
+        set rowcat1 end=last;
+        /* 行分类-分类数 */
+        call symputx(cats("v1txt",_n_),rowcat );
+        if last then call symput("var1_n",_n_);
+    run;
+    proc delete data=rowcat1;
+    quit;
+%end;
+%else %do;
+    /* 横-行:根据指定分类读取分类数 */
+    data _null_;
+        txt = symget('var1txt');delimiter = symget('delimiter');
+        n = countw(txt, delimiter) ;
+      call symputx('var1_n', n);
+    run;
+/*    %let var1_n = %eval(%sysfunc(countw(&var1txt, %unquote(%superq(delimiter)) )) + 1);*/
+%end;
+
+%if %length(&var2txt)=0 %then %do;
+    /* 提取列分类-缺失已填补为&misstxt */
+    proc sql noprint;
+        create table linecat1 as
+        select
+            distinct( &var2 ) as linecat
+        from indata; 
+    quit;
+    data _null_;
+        set linecat1 end=last;
+        /* 列分类-分类数 */
+        call symputx(cats("v2txt",_n_),linecat );
+        if last then call symput("var2_n",_n_);
+    run;
+    proc delete data=linecat1;
+    quit;
+%end;
+%else %do;
+    /* 纵-列:根据指定分类读取分类数 */
+    data _null_;
+        txt = symget('var2txt');delimiter = symget('delimiter');
+        n = countw(txt, delimiter) ;
+      call symputx('var2_n', n);
+    run;
+%end;
+
+
+/* ------------------循环计数------------ */
+/* 总数 */
+data _null_;
+    if 0 then set indata nobs=n;
+    call symput("n_tol",n);
+run;
+
+
+/* 行 */
+%do i=1 %to &var1_n;
+    %if %length(&var1txt)>0 %then %do;
+        %put a-2 ;
+        %let v1txt&i = %qtrim( %qscan( %superq(var1txt),&i,%unquote(%superq(delimiter)) ) ) ;
+        %put a-1 ;
+    %end;
+
+    /* 内嵌纵标目循环: symget()适用于包含特殊字符的宏变量值 */
+    /* 列 */
+    %do j=1 %to &var2_n;
+        %if %length(&var2txt)>0 %then %do;
+            %let v2txt&j = %qtrim( %qscan(%superq(var2txt),&j,%unquote(%superq(delimiter)) ) );
+        %end;
+        proc sql noprint;
+            select count(*) into : n_rc&i&j
+            from indata where &var1 = symget( cats('v1txt',&i)) and &var2 = symget( cats('v2txt',&j))
+        ; quit;
+    %end;
+
+%end;
+
+
+
+
+/* ------------------------------构建数据集--------------------- */
+%let var1_tol_n = %eval(&var1_n+1) ;
+%let var2_tol_n = %eval(&var2_n+1) ;
+/* 行和列的总合计标签 */
+%let v1txt&var1_tol_n = 合计 ;
+%let v2txt&var2_tol_n = 合计 ;
+
+
+/* 生成横标目等框架 %do循环生成变量，%str()保证各变量之间有空格 */
+/*option symbolgen mlogic mprint;*/
+data out_form;
+    length  seq 8. cate $200. ;
+    %do i=1 %to &var1_n;
+        seq=&i ; cate=strip( symget(cats('v1txt',&i)) )||"&rowtxt_suffix" ; output;
+    %end;
+    seq= &var1_tol_n ; cate="合计"||"&rowtxt_suffix" ; output;
+run;
+
+data &outdata;
+    set out_form;
+    length  %do j=1 %to &var2_tol_n; value&j $200. %str() %end; TOTALN 8;
+    /* 赋值数据 */
+    if seq= &var1_tol_n then do;
+        %do j=1 %to &var2_n;
+            /* 行合计观测下：各j变量的合计 */
+            value&j= strip(put( %do i=1 %to &var1_n ;&&n_rc&i&j + %end;0 ,8.));
+            label value&j= "%superq(v2txt&j)" ;
+        %end;
+            /* 总合计 */
+            value&var2_tol_n= strip(put( %do j=1 %to &var2_n ;value&j + %end;0 ,8.));
+            label value&var2_tol_n="合计";
+    end;
+    else do;
+    %do m=1 %to &var1_n ;
+        %do k=1 %to &var2_n ;
+            if seq=&m then do;
+                /* 内部RC表数据填充 */
+                value&k = strip("&&n_rc&m&k");
+            end;
+        %end;
+            if seq=&m then do;
+                /* 每行合计 */
+                value&var2_tol_n = strip(put( %do j=1 %to &var2_n ;value&j + %end;0 ,8.));
+            end;
+    %end;
+    end;
+    TOTALN=&n_tol;
+    label TOTALN="输入数据集的总例数";
+run;
+
+
+
+
+/*option nosymbolgen nomlogic nomprint;*/
+/* ----------------是否计算频率------------------ */
+%if &freqyn=1 %then %do;
+
+    /* undo_policy=none:不报 create相同数据集名称的warning */
+    proc sql noprint undo_policy=none;
+        create table &outdata as
+            select
+                seq,
+                cate,
+                %do j=1 %to &var2_tol_n;
+                    (case
+                        when count("&freqtype","TOTAL")>0 and sum(input(value&var2_tol_n,8.))>0 then strip(value&j)||"("||strip( put(input(value&j ,8.)/(sum(input(value&var2_tol_n,8.))/2),&perfmt.) )||")"
+                        when count("&freqtype","TOTAL")>0 and sum(input(value&var2_tol_n,8.))=0 then strip(value&j)||"("||strip( put(0,&perfmt.) )||")"
+
+                        when count("&freqtype","LINE")>0 and sum(input(value&j,8.))>0 then strip(value&j)||"("||strip( put(input(value&j ,8.)/(sum(input(value&j,8.))/2),&perfmt.) )||")"
+                        when count("&freqtype","LINE")>0 and sum(input(value&j,8.))=0 then strip(value&j)||"("||strip( put(0,&perfmt.) )||")"
+
+                        when count("&freqtype","COL")>0 and input(value&var2_tol_n,8.)>0 then strip(value&j)||"("||strip( put(input(value&j ,8.)/input(value&var2_tol_n,8.),&perfmt.) )||")"
+                        when count("&freqtype","COL")>0 and input(value&var2_tol_n,8.)=0 then strip(value&j)||"("||strip( put(0,&perfmt.) )||")"
+                        else strip(value&j)
+                    end)                as value&j      length=200      label="%superq(v2txt&j)"    ,
+                %end;
+                TOTALN
+        from &outdata;
+    quit;
+%end;
+
+
+/* -----------删除过程数据----------- */
+proc delete data= indata out_form;
+quit;
+run;
+
+/* 参数注释条件结束 */
+%end;
+
+%mend ;
+
+
