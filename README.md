@@ -150,8 +150,8 @@
   ```  
 
 ## rowtxt_suffix
-    横标目分类下，后缀标签文本，作用于`cate_标签`。  
-    default：为空。
+  横标目分类下，后缀标签文本，作用于 `cate_标签`。  
+  default：为空。
   
 # END
     
