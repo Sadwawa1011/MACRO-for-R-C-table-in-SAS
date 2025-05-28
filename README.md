@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/547c80bb-8bb8-4e9d-82b5-2ecbeec981c2)# MACRO-for-R-C-table-in-SAS
+# MACRO-for-R-C-table-in-SAS
   '不定分类下行×列联表的SAS宏程序'
   '目的'：用于定性变量中，行×列的分类计数（以及相应的百分比）。
 
@@ -29,7 +29,8 @@
   %rc_table();
   %rc_table(help);
   '''
-  
+  ![image](https://github.com/user-attachments/assets/547c80bb-8bb8-4e9d-82b5-2ecbeec981c2)
+
 #参数使用语法
 ##indata
   输入用于分析的数据集名称
