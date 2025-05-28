@@ -145,9 +145,9 @@
 ## misstxt
   [var1](#var1)/[var2](#var2)分类变量的`缺失填补文本`。  
   default  
-  '''sas  
+  ```sas  
   misstxt = %str(缺失) ;  
-  '''  
+  ```  
 
 ## rowtxt_suffix
     横标目分类下，后缀标签文本，作用于`cate_标签`。  
