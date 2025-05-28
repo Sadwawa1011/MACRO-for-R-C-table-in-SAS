@@ -29,7 +29,6 @@
   %rc_table();
   %rc_table(help);
   '''
-  ![image](https://github.com/user-attachments/assets/547c80bb-8bb8-4e9d-82b5-2ecbeec981c2)
 
 #参数使用语法
 ##indata
