@@ -75,11 +75,11 @@
   
 <div align="center">
 
-| cate_横标目标签  | 
-| ：----------： | 
-| 文本3 | 
-| 文本1 | 
-| 文本2 |
+| cate_横标目标签      |   var2...   |
+|  ---------           | -------     |
+| 文本3                | nij         |
+| 文本1                | ...         |
+| 文本2                | ...         |
     
 </div>
   
@@ -90,7 +90,7 @@
   语法同[var1txt](##var1txt)。  
 
 ## delimiter
-  [var1xtx](#var1txt)/[var2txt](#var2txt)的分类分隔符。  
+  [var1txt](#var1txt)/[var2txt](#var2txt)的分类分隔符。  
   default  
   '''  
   delimiter = '%'str();  
@@ -104,11 +104,11 @@
 <div align="center">
 
 | 可选项（数值型）  |   含义      |
-| ：-----：         | :-----     |
+|  ---------         | -------     |
 | 0                 | 不计算频率  |
 | 1                 |  计算频率   |
 
- </div>  
+</div>  
     
   default  
   '''sas  
@@ -120,7 +120,7 @@
 <div align="center">
     
 | 可选项（文本型）  |   含义      |
-| ：-----：         | :-----     |
+| -----             | --------     |
 | total             | 按照列联表'总合计例数'计算每个分类的百分比，即 nij / ntol  |
 | col               | 按照列联表'列合计例数'计算每一个分类的百分比，即 nij / Ni_tol   |
 | row               | 按照列联表'行合计例数'计算每一个分类的百分比，即 nij / nj_tol  |
@@ -148,8 +148,12 @@
   '''sas  
   misstxt = %str(缺失) ;  
   '''  
+
+## rowtxt_suffix
+    横标目分类下，后缀标签文本。  
+    default：为空。
   
-#END
+# END
     
 
 
