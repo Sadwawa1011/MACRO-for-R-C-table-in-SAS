@@ -3,20 +3,20 @@
   `目的`：用于定性变量中，行×列的分类计数（以及相应的百分比）。
 
 # 必填参数目录content
--[indata](#indata)  
--[outdata](#outdata)  
--[var1](#var1)  
--[var2](#var2)  
+- [indata](#indata)  
+- [outdata](#outdata)  
+- [var1](#var1)  
+- [var2](#var2)  
 
 # 可选参数目录content
--[var1txt](#var1txt)  
--[var2txt](#var2txt)  
--[freqyn](#freqyn)  
--[freqtype](#freqtype)  
--[perfmt](#perfmt)  
--[misstxt](#misstxt)  
--[rowtxt_suffix](#rowtxt_suffix)  
--[delimiter](#delimiter)  
+- [var1txt](#var1txt)  
+- [var2txt](#var2txt)  
+- [freqyn](#freqyn)  
+- [freqtype](#freqtype)  
+- [perfmt](#perfmt)  
+- [misstxt](#misstxt)  
+- [rowtxt_suffix](#rowtxt_suffix)  
+- [delimiter](#delimiter)  
 
 # 宏程序使用语法
 ```sas  
