@@ -70,11 +70,16 @@
   var1txt = %str(文本3@文本1@文本2) , delimiter = "@" ;
   '''
   结果：
+  <div align="center">
+  
   | cate_横标目标签  | 
   | ：----------： | 
   | 文本3 | 
   | 文本1 | 
   | 文本2 |
+    
+  </div>
+  
   排序：按照调用中所填文本顺序呈现，可与参数-[delimiter](#delimiter)联合使用。
   
 ##var2txt
@@ -92,21 +97,31 @@
 
 ##freqyn
   是否计算频率（即百分比）。
+  <div align="center">
+    
   | 可选项（数值型）  |   含义      |
   | ：-----：         | :-----     |
   | 0                 | 不计算频率  |
   | 1                 |  计算频率   |
+
+  </div>
+    
   default
   '''sas
   freq = 0 ;
   '''
 ##freqtype
-  频率计算方法/类型：支持一下三种计算类型
+  频率计算方法/类型：支持一下三种计算类型。
+  <div align="center">
+    
   | 可选项（文本型）  |   含义      |
   | ：-----：         | :-----     |
   | total             | 按照列联表'总合计例数'计算每个分类的百分比，即 nij / ntol  |
   | col               | 按照列联表'列合计例数'计算每一个分类的百分比，即 nij / Ni_tol   |
   | row               | 按照列联表'行合计例数'计算每一个分类的百分比，即 nij / nj_tol  |
+
+  </div>
+  
   default：仅freqyn=1时，生效
   '''sas
   freqtype = %str(total) ;
@@ -128,6 +143,7 @@
   '''sas
   misstxt = %str(缺失)
   '''
+  
 #END
     
 
