@@ -95,7 +95,7 @@
   ``` 
   delimiter = %str();  
   ```
-  备注：仅作用于var1xtx/var2txtx调用时，中文逗号建议不作为分隔符，非ASCⅡ字符的处理目前存在一些特殊问题。
+  备注：仅作用于[var1txt](#var1txt)/[var2txt](#var2txt)调用时，中文逗号建议不作为分隔符，非ASCⅡ字符的处理目前存在一些特殊问题。
   
 
 ## freqyn
